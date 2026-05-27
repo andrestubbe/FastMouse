@@ -1,0 +1,29 @@
+# Build outputs
+target/
+build/
+*.dll
+*.obj
+*.exp
+*.lib
+*.class
+
+# Prevent accidental root-level artifact commits
+/*.dll
+/*.obj
+
+# BUT allow DLLs committed in resources (if you use that strategy)
+!src/main/resources/native/*.dll
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd

@@ -1,0 +1,12 @@
+LIBRARY fastmouse
+EXPORTS
+    ; JNI Method Exports
+    ; Format: Java_packagename_Classname_methodName
+    
+    Java_fastmouse_FastMouseImpl_nativeInitialize
+    Java_fastmouse_FastMouseImpl_nativeStartListening
+    Java_fastmouse_FastMouseImpl_nativeStopListening
+    Java_fastmouse_FastMouseImpl_nativeGetConnectedDevices
+    Java_fastmouse_FastMouseImpl_nativeGetDeviceName
+    Java_fastmouse_FastMouseImpl_nativeGetDeviceButtonCount
+    Java_fastmouse_FastMouseImpl_nativeGetCursorPosition
