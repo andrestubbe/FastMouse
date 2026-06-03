@@ -1,4 +1,4 @@
-﻿# FastMouse v0.1.0 [ALPHA] — High-Performance Native Mouse API for Java
+# FastMouse v0.1.0 [ALPHA] � High-Performance Native Mouse API for Java
 
 [![Status](https://img.shields.io/badge/status-v0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastMouse/releases/tag/v0.1.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -8,7 +8,7 @@
 
 ---
 
-**⚡ A zero-latency native mouse module for the FastJava ecosystem. Real-time mouse movement, button events, and global
+**? A zero-latency native mouse module for the FastJava ecosystem. Real-time mouse movement, button events, and global
 hooks via JNI.**
 
 FastMouse provides an ultra-fast alternative to the standard Java AWT mouse system. By using native Windows hooks and
@@ -29,10 +29,10 @@ direct JNI calls, it delivers movement and button events with zero latency.
 ---
 
 ## Features
-- **🖱️ Global Hooks**: Capture mouse events system-wide with zero latency.
-- **⚡ Raw Speed**: Bypasses the heavy Java AWT/Swing event thread.
-- **📦 Minimal Overhead**: Optimized JNI implementation for high-frequency input.
-- **🚀 Native Reliability**: Direct Win32 API integration.
+- **??? Global Hooks**: Capture mouse events system-wide with zero latency.
+- **? Raw Speed**: Bypasses the heavy Java AWT/Swing event thread.
+- **?? Minimal Overhead**: Optimized JNI implementation for high-frequency input.
+- **?? Native Reliability**: Direct Win32 API integration.
 
 ---
 
@@ -81,8 +81,8 @@ dependencies {
 ### Option 3: Direct Download (No Build Tool)
 Download the latest JARs directly to add them to your classpath:
 
-1. 📦 **[fastmouse-v0.1.0.jar](https://github.com/andrestubbe/FastMouse/releases/download/v0.1.0/fastmouse-v0.1.0.jar)** (The Core Library)
-2. ⚙️ **[fastcore-v0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/v0.1.0/fastcore-v0.1.0.jar)** (The Mandatory Native Loader)
+1. ?? **[fastmouse-v0.1.0.jar](https://github.com/andrestubbe/FastMouse/releases/download/v0.1.0/fastmouse-v0.1.0.jar)** (The Core Library)
+2. ?? **[fastcore-v0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/v0.1.0/fastcore-v0.1.0.jar)** (The Mandatory Native Loader)
 
 > [!IMPORTANT]
 > All JARs must be in your classpath for the native JNI calls to function correctly.
@@ -93,24 +93,24 @@ Download the latest JARs directly to add them to your classpath:
 
 * **[COMPILE.md](docs/COMPILE.md)**: Full compilation guide (MSVC C++17 build chain + JNI Setup).
 * **[REFERENCE.md](docs/REFERENCE.md)**: Full API descriptions, border configurations, and codepoint index.
-* **[PHILOSOPHIE.md](docs/PHILOSOPHIE.md)**: The engineering rationale for zero-allocation performance.
+* **[PHILOSOPHY.md](docs/PHILOSOPHY.md)**: The engineering rationale for zero-allocation performance.
 * **[ROADMAP.md](docs/ROADMAP.md)**: Future milestones and planned features.
 
 ---
 ## License
-MIT License — See [LICENSE](LICENSE) file for details.
+MIT License � See [LICENSE](LICENSE) file for details.
 
 ---
 
 ## Related Projects
-- [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader & JNI Utilities for Java
-- [FastHotkey](https://github.com/andrestubbe/FastHotkey) — Low-Latency Global Hotkey API for Java
-- [FastKeyboard](https://github.com/andrestubbe/FastKeyboard) — Native Windows RawInput API for Java
-- [FastKeylogger](https://github.com/andrestubbe/FastKeylogger) — Behavioral Typing Logic for Java
-- [FastTouch](https://github.com/andrestubbe/FastTouch) — Native touchscreen input for Java
-- [FastStylus](https://github.com/andrestubbe/FastStylus) — Native Stylus/Pen Input for Java
+- [FastCore](https://github.com/andrestubbe/FastCore) � Native Library Loader & JNI Utilities for Java
+- [FastHotkey](https://github.com/andrestubbe/FastHotkey) � Low-Latency Global Hotkey API for Java
+- [FastKeyboard](https://github.com/andrestubbe/FastKeyboard) � Native Windows RawInput API for Java
+- [FastKeylogger](https://github.com/andrestubbe/FastKeylogger) � Behavioral Typing Logic for Java
+- [FastTouch](https://github.com/andrestubbe/FastTouch) � Native touchscreen input for Java
+- [FastStylus](https://github.com/andrestubbe/FastStylus) � Native Stylus/Pen Input for Java
 
 ---
-**Part of the FastJava Ecosystem** — *Making the JVM faster.*
+**Part of the FastJava Ecosystem** � *Making the JVM faster.*
 
 
