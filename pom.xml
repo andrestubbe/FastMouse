@@ -7,7 +7,7 @@
 
     <groupId>io.github.andrestubbe</groupId>
     <artifactId>FastMouse</artifactId>
-    <version>0.1.0</version>
+    <version>v0.1.0</version>
     <packaging>jar</packaging>
 
     <name>FastMouse</name>
@@ -53,7 +53,7 @@
         <!-- FastCore - Unified JNI loader -->
         <dependency>
             <groupId>io.github.andrestubbe</groupId>
-            <artifactId>fastcore</artifactId>
+            <artifactId>FastCore</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
