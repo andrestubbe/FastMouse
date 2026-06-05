@@ -1,4 +1,5 @@
-﻿@echo off
+@echo off
+chcp 65001 >nul
 cd /d "%~dp0"
 
 echo ============================================
@@ -6,7 +7,7 @@ echo FastMouse Demo - Raw Input Mouse API
 echo ============================================
 echo.
 
-call mvn package -DskipTests -q
+call mvn package -DskipTests
 if errorlevel 1 (
     echo.
     echo [WARNING] Build had issues, continuing with existing JAR...
@@ -22,8 +23,8 @@ echo.
 
 echo [3/3] Building and running demo...
 cd examples\Demo
-call mvn compile -q
-call mvn exec:java -q
+call mvn compile
+call mvn exec:java
 cd ..\..
 
 echo.
