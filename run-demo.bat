@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 cd /d "%~dp0"
 
 echo ============================================
@@ -6,7 +6,6 @@ echo FastMouse Demo - Raw Input Mouse API
 echo ============================================
 echo.
 
-echo [1/3] Building main project...
 call mvn package -DskipTests -q
 if errorlevel 1 (
     echo.
