@@ -1,4 +1,4 @@
-# FastMouse 0.1.1 [ALPHA-2026-08] — Ultra-Low Latency Native RawInput Mouse Engine for Java
+# FastMouse 0.1.1 [ALPHA-2026-08-19] — Ultra-Low Latency Native RawInput Mouse Engine for Java
 
 [![Status](https://img.shields.io/badge/status-0.1.1-brightgreen.svg)](https://github.com/andrestubbe/FastMouse/releases/tag/0.1.1)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
