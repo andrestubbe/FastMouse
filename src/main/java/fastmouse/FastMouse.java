@@ -1,6 +1,5 @@
 package fastmouse;
 
-import fastcore.FastCore;
 import java.util.List;
 
 /**
@@ -8,25 +7,69 @@ import java.util.List;
  * 
  * Provides ultra-low latency mouse input by bypassing Windows mouse ballistics
  * and using the Win32 Raw Input API (WM_INPUT) directly.
+ * Supports window-focus gating and native ScreenToClient coordinate conversion.
  */
-public interface FastMouse {
+public interface FastMouse extends AutoCloseable {
 
     /**
-     * Creates a new FastMouse instance.
-     * @return A new FastMouse instance
+     * Creates a new global FastMouse instance.
      */
     static FastMouse open() {
         return new FastMouseImpl();
     }
 
     /**
+     * Creates a new FastMouse instance bound to a specific Win32 window handle (HWND).
+     * Coordinates are automatically converted to local client pixels (0..width, 0..height),
+     * and events are only dispatched when the window has active focus.
+     *
+     * @param targetWindowHandle Native HWND
+     */
+    static FastMouse openForWindow(long targetWindowHandle) {
+        return new FastMouseImpl(targetWindowHandle);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Events & Lifecycle
+    // ═══════════════════════════════════════════════════════════
+
+    /**
      * Starts listening for raw mouse events.
-     * This registers a message-only window and begins processing WM_INPUT messages
-     * on a background thread.
      * 
      * @param listener The callback interface for mouse events
      */
     void startListening(FastMouseListener listener);
+
+    /**
+     * Stops listening for mouse events and cleans up native resources.
+     */
+    void stopListening();
+
+    @Override
+    default void close() {
+        stopListening();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Normal Methods (Binding & Devices)
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Binds mouse capture to a specific Win32 window handle.
+     * When bound, absolute coordinates become client-relative (0..width, 0..height)
+     * and events are filtered so only active window events are dispatched.
+     * Pass 0 to restore global desktop capture.
+     *
+     * @param targetWindowHandle Native HWND
+     */
+    void bindToWindow(long targetWindowHandle);
+
+    /**
+     * Restores global desktop mouse capture.
+     */
+    default void unbindFromWindow() {
+        bindToWindow(0);
+    }
 
     /**
      * Returns all currently connected mouse devices.
@@ -34,15 +77,34 @@ public interface FastMouse {
      */
     List<MouseDevice> getConnectedDevices();
 
-    /**
-     * Stops listening for mouse events and cleans up native resources.
-     */
-    void stopListening();
+    // ═══════════════════════════════════════════════════════════
+    // Is / Has
+    // ═══════════════════════════════════════════════════════════
 
     /**
-     * Retrieves the current absolute cursor position in screen coordinates.
+     * Checks if the listener is currently active.
+     */
+    boolean isListening();
+
+    /**
+     * Returns whether mouse capture is currently bound to a specific window.
+     */
+    boolean isWindowBound();
+
+    // ═══════════════════════════════════════════════════════════
+    // Getter
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Retrieves the current cursor position.
+     * If window-bound, returns [x, y] in local client pixels; otherwise in screen pixels.
      * 
-     * @return An array of [x, y] in screen pixels
+     * @return An array of [x, y] coordinates
      */
     int[] getCursorPosition();
+
+    /**
+     * Returns the currently bound window handle (HWND), or 0 if listening globally.
+     */
+    long getBoundWindow();
 }

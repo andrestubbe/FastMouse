@@ -4,6 +4,8 @@ EXPORTS
     ; Format: Java_packagename_Classname_methodName
     
     Java_fastmouse_FastMouseImpl_nativeInitialize
+    Java_fastmouse_FastMouseImpl_nativeInitializeForWindow
+    Java_fastmouse_FastMouseImpl_nativeBindWindow
     Java_fastmouse_FastMouseImpl_nativeStartListening
     Java_fastmouse_FastMouseImpl_nativeStopListening
     Java_fastmouse_FastMouseImpl_nativeGetConnectedDevices

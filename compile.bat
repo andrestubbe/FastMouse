@@ -42,7 +42,9 @@ echo Found Visual Studio at: %VS_PATH%
 
 :: Try to detect JAVA_HOME if not set
 if not defined JAVA_HOME (
-    if exist "C:\Program Files\Java\jdk-25" (
+    if exist "C:\Program Files\Java\jdk-21.0.12.1" (
+        set "JAVA_HOME=C:\Program Files\Java\jdk-21.0.12.1"
+    ) else if exist "C:\Program Files\Java\jdk-25" (
         set "JAVA_HOME=C:\Program Files\Java\jdk-25"
     ) else if exist "C:\Program Files\Eclipse Adoptium\jdk-17-hotspot" (
         set "JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17-hotspot"
@@ -63,6 +65,9 @@ call "%VS_PATH%\VC\Auxiliary\Build\vcvars64.bat"
 
 :: Create build directory
 if not exist build mkdir build
+if not exist src\main\resources\native mkdir src\main\resources\native
+set "FASTCORE_DIR=%USERPROFILE%\.fastcore\native\%LIB_NAME%"
+if not exist "%FASTCORE_DIR%" mkdir "%FASTCORE_DIR%"
 
 :: Compile C++ source
 cl.exe /O2 /W3 /MD /EHsc /LD ^
@@ -77,12 +82,12 @@ cl.exe /O2 /W3 /MD /EHsc /LD ^
 if %ERRORLEVEL% == 0 (
     echo.
     echo [SUCCESS] DLL built at: build\%LIB_NAME%.dll
-    copy /y build\%LIB_NAME%.dll src\main\resources\native\
+    copy /y build\%LIB_NAME%.dll src\main\resources\native\ >nul
+    copy /y build\%LIB_NAME%.dll "%FASTCORE_DIR%\%LIB_NAME%.dll" >nul
 ) else (
     echo.
     echo [FAILED] Compilation failed.
     exit /b 1
 )
 
-echo.
-pause
+exit /b 0

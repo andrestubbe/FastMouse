@@ -24,6 +24,7 @@
 
 struct MouseContext {
     jlong handle;
+    HWND targetHwnd{NULL}; // Bound window handle (NULL = global capture)
     jobject javaObject;
     jmethodID onMouseMove;
     jmethodID onMouseButton;
@@ -66,6 +67,16 @@ static jlong GetStableDeviceId(HANDLE hDevice) {
 
 LRESULT CALLBACK MouseWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     if (msg == WM_INPUT) {
+        MouseContext* ctx = g_ctx;
+
+        // Fast Window-Focus Gating: If target window is specified, only process when active!
+        if (ctx && ctx->targetHwnd != NULL) {
+            HWND fgWindow = GetForegroundWindow();
+            if (fgWindow != ctx->targetHwnd) {
+                return 0; // Target window does NOT have focus -> Zero CPU overhead, skip!
+            }
+        }
+
         HRAWINPUT hRawInput = (HRAWINPUT)lParam;
         
         UINT size;
@@ -77,14 +88,20 @@ LRESULT CALLBACK MouseWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
         RAWINPUT* raw = (RAWINPUT*)buffer.data();
         
         if (raw->header.dwType == RIM_TYPEMOUSE) {
-            MouseContext* ctx = g_ctx;
             if (ctx && ctx->running && ctx->threadAttached) {
                 JNIEnv* env = ctx->env;
                 jlong stableDeviceId = GetStableDeviceId(raw->header.hDevice);
+
+                // Compute cursor coordinates
+                POINT pt = {0, 0};
+                GetCursorPos(&pt);
+
+                // If window-bound, convert screen coords directly to local client coordinates (0..width, 0..height)
+                if (ctx->targetHwnd != NULL) {
+                    ScreenToClient(ctx->targetHwnd, &pt);
+                }
                 
                 if (raw->data.mouse.lLastX != 0 || raw->data.mouse.lLastY != 0) {
-                    POINT pt = {0, 0};
-                    GetCursorPos(&pt);
                     env->CallVoidMethod(ctx->javaObject, ctx->onMouseMove,
                         stableDeviceId,
                         (jint)raw->data.mouse.lLastX,
@@ -231,14 +248,20 @@ void messageLoopThread(MouseContext* ctx) {
 // ============================================================================
 
 JNIEXPORT jlong JNICALL Java_fastmouse_FastMouseImpl_nativeInitialize(JNIEnv* env, jobject obj) {
+    return Java_fastmouse_FastMouseImpl_nativeInitializeForWindow(env, obj, 0);
+}
+
+JNIEXPORT jlong JNICALL Java_fastmouse_FastMouseImpl_nativeInitializeForWindow(JNIEnv* env, jobject obj, jlong targetWindowHandle) {
     std::lock_guard<std::mutex> lock(g_mutex);
     
     if (g_ctx) {
+        g_ctx->targetHwnd = (HWND)targetWindowHandle;
         return g_ctx->handle;
     }
     
     g_ctx = new MouseContext();
     g_ctx->handle = 1;
+    g_ctx->targetHwnd = (HWND)targetWindowHandle;
     g_ctx->javaObject = env->NewGlobalRef(obj);
     env->GetJavaVM(&g_ctx->vm);
     
@@ -256,6 +279,13 @@ JNIEXPORT jlong JNICALL Java_fastmouse_FastMouseImpl_nativeInitialize(JNIEnv* en
     }
     
     return g_ctx->handle;
+}
+
+JNIEXPORT void JNICALL Java_fastmouse_FastMouseImpl_nativeBindWindow(JNIEnv* env, jobject obj, jlong handle, jlong targetWindowHandle) {
+    std::lock_guard<std::mutex> lock(g_mutex);
+    if (g_ctx && g_ctx->handle == handle) {
+        g_ctx->targetHwnd = (HWND)targetWindowHandle;
+    }
 }
 
 JNIEXPORT void JNICALL Java_fastmouse_FastMouseImpl_nativeStartListening(JNIEnv* env, jobject obj, jlong handle) {

@@ -1,20 +1,23 @@
-# FastMouse REFERENCE
+# FastMouse Technical Reference
 
 ## 1. Java API Reference
 
 ### `FastMouse` (Interface)
-Die Haupt-Schnittstelle zur Interaktion mit dem Raw Input Subsystem.
+The primary interface for interacting with the native Raw Input mouse subsystem.
 
-| Methode | Beschreibung | Parameter | Rückgabewert |
-| :--- | :--- | :--- | :--- |
-| `static FastMouse open()` | Instanziiert das native JNI-Backend. | — | `FastMouse` |
-| `void startListening(FastMouseListener l)` | Startet den nativen Message-Thread. | `FastMouseListener` | — |
-| `void stopListening()` | Stoppt den nativen Thread und gibt Handles frei. | — | — |
-| `List<MouseDevice> getConnectedDevices()` | Zählt alle aktiven Hardware-Mäuse auf. | — | `List<MouseDevice>` |
-| `int[] getCursorPosition()` | Fragt die absoluten Bildschirm-Koordinaten ab. | — | `int[]` (Format: `[x, y]`) |
+| Method | Description |
+|:---|:---|
+| `static FastMouse open()` | Instantiates global desktop Raw Input listener. |
+| `static FastMouse openForWindow(long hwnd)` | Instantiates window-bound listener with auto `ScreenToClient` pixel mapping. |
+| `void startListening(FastMouseListener l)` | Starts the background Win32 message pump thread. |
+| `void stopListening()` | Stops the background thread and cleans up native resources. |
+| `void bindToWindow(long hwnd)` | Focus-gates events and converts absolute coordinates to client-relative. |
+| `void unbindFromWindow()` | Restores global desktop capture mode. |
+| `List<MouseDevice> getConnectedDevices()` | Enumerates physically attached HID mouse devices. |
+| `int[] getCursorPosition()` | Retrieves cursor position in client or screen coordinates. |
 
-### `FastMouseListener` (Callback-Interface)
-Erhält Hardware-Events direkt aus dem nativen Thread.
+### `FastMouseListener` (Callback Interface)
+Receives unthrottled hardware events directly from the native thread:
 
 ```java
 public interface FastMouseListener {
@@ -24,19 +27,21 @@ public interface FastMouseListener {
 }
 ```
 
-*   `deviceHandle`: Stabile ID des physischen Eingabegeräts.
-*   `deltaX`/`deltaY`: Rohdaten-Bewegungsdeltas vom Maussensor (ohne OS-Zeigerbeschleunigung).
-*   `absoluteX`/`absoluteY`: Absoluter Desktop-Pixelort des Mauszeigers.
-*   `buttonId`: `0` = Links, `1` = Rechts, `2` = Mitte, `3` = Daumen vor, `4` = Daumen zurück.
+* `deviceHandle`: Stable native handle of the physical mouse hardware device.
+* `deltaX` / `deltaY`: Raw unaccelerated sensor deltas directly from the mouse sensor.
+* `absoluteX` / `absoluteY`: If window-bound, relative client pixels `(0..width, 0..height)`; if global, desktop screen pixels.
+* `buttonId`: `0` = Left, `1` = Right, `2` = Middle, `3` = Button 4, `4` = Button 5.
 
 ---
 
-## 2. Native Win32 JNI Schnittstelle
+## 2. Native Win32 JNI Interface
 
-Die nativen Signaturen sind in C++ exportiert über `fastmouse.dll`:
+Exported from `fastmouse.dll`:
 
 ```cpp
 JNIEXPORT jlong JNICALL Java_fastmouse_FastMouseImpl_nativeInitialize(JNIEnv*, jobject);
+JNIEXPORT jlong JNICALL Java_fastmouse_FastMouseImpl_nativeInitializeForWindow(JNIEnv*, jobject, jlong targetWindowHandle);
+JNIEXPORT void JNICALL Java_fastmouse_FastMouseImpl_nativeBindWindow(JNIEnv*, jobject, jlong handle, jlong targetWindowHandle);
 JNIEXPORT void JNICALL Java_fastmouse_FastMouseImpl_nativeStartListening(JNIEnv*, jobject, jlong);
 JNIEXPORT void JNICALL Java_fastmouse_FastMouseImpl_nativeStopListening(JNIEnv*, jobject, jlong);
 JNIEXPORT jlongArray JNICALL Java_fastmouse_FastMouseImpl_nativeGetConnectedDevices(JNIEnv*, jobject);

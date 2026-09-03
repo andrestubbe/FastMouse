@@ -44,6 +44,8 @@
  * @return Native handle for the listener
  */
 JNIEXPORT jlong JNICALL Java_fastmouse_FastMouseImpl_nativeInitialize(JNIEnv* env, jobject obj);
+JNIEXPORT jlong JNICALL Java_fastmouse_FastMouseImpl_nativeInitializeForWindow(JNIEnv* env, jobject obj, jlong targetWindowHandle);
+JNIEXPORT void JNICALL Java_fastmouse_FastMouseImpl_nativeBindWindow(JNIEnv* env, jobject obj, jlong handle, jlong targetWindowHandle);
 
 /**
  * @brief Start listening for mouse events
