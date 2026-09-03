@@ -107,4 +107,18 @@ public interface FastMouse extends AutoCloseable {
      * Returns the currently bound window handle (HWND), or 0 if listening globally.
      */
     long getBoundWindow();
+
+    /**
+     * Helper to retrieve the current process console window handle (HWND), or 0 if not running in a console.
+     */
+    static long getConsoleWindow() {
+        return FastMouseImpl.getConsoleWindowHandle();
+    }
+
+    /**
+     * Checks if a specific virtual key (e.g. 0x42 for 'B', 0x1B for ESC) is currently physically pressed.
+     */
+    static boolean isKeyPressed(int vKey) {
+        return FastMouseImpl.isKeyPressed(vKey);
+    }
 }

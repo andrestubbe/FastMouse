@@ -65,16 +65,33 @@ static jlong GetStableDeviceId(HANDLE hDevice) {
     return newId;
 }
 
+// Check if target window or any of its children/hosts is currently focused (FastTerminal logic)
+static inline bool IsWindowFocused(HWND targetHwnd) {
+    if (targetHwnd == NULL) return true;
+    HWND fgWindow = GetForegroundWindow();
+    if (fgWindow == NULL) return false;
+    if (fgWindow == targetHwnd) return true;
+
+    // Check root ancestors and owner window trees (crucial for wt.exe / Windows Terminal / Swing / Canvas)
+    if (GetAncestor(targetHwnd, GA_ROOT) == fgWindow) return true;
+    if (GetAncestor(targetHwnd, GA_ROOTOWNER) == fgWindow) return true;
+    if (GetAncestor(fgWindow, GA_ROOT) == targetHwnd) return true;
+
+    // Walk parent hierarchy to handle embedded hosts
+    HWND parent = targetHwnd;
+    while ((parent = GetParent(parent)) != NULL) {
+        if (parent == fgWindow) return true;
+    }
+    return false;
+}
+
 LRESULT CALLBACK MouseWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     if (msg == WM_INPUT) {
         MouseContext* ctx = g_ctx;
 
         // Fast Window-Focus Gating: If target window is specified, only process when active!
-        if (ctx && ctx->targetHwnd != NULL) {
-            HWND fgWindow = GetForegroundWindow();
-            if (fgWindow != ctx->targetHwnd) {
-                return 0; // Target window does NOT have focus -> Zero CPU overhead, skip!
-            }
+        if (ctx && ctx->targetHwnd != NULL && !IsWindowFocused(ctx->targetHwnd)) {
+            return 0; // Target window does NOT have focus -> Zero CPU overhead, skip!
         }
 
         HRAWINPUT hRawInput = (HRAWINPUT)lParam;
@@ -96,9 +113,14 @@ LRESULT CALLBACK MouseWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
                 POINT pt = {0, 0};
                 GetCursorPos(&pt);
 
-                // If window-bound, convert screen coords directly to local client coordinates (0..width, 0..height)
+                // If window-bound, restrict tracking strictly to inside the window rect & convert to local client coordinates
                 if (ctx->targetHwnd != NULL) {
+                    RECT rc = {0};
+                    GetClientRect(ctx->targetHwnd, &rc);
                     ScreenToClient(ctx->targetHwnd, &pt);
+                    if (pt.x < 0 || pt.y < 0 || pt.x >= rc.right || pt.y >= rc.bottom) {
+                        return 0; // Cursor is outside the window -> skip event!
+                    }
                 }
                 
                 if (raw->data.mouse.lLastX != 0 || raw->data.mouse.lLastY != 0) {
@@ -193,10 +215,10 @@ void messageLoopThread(MouseContext* ctx) {
         return;
     }
     
-    // Create message-only window
+    // RIDEV_INPUTSINK requires a top-level window (cannot be HWND_MESSAGE)!
     ctx->messageWindow = CreateWindowEx(
-        0, WINDOW_CLASS_NAME, L"FastMouse",
-        0, 0, 0, 0, 0, HWND_MESSAGE, NULL, GetModuleHandle(NULL), NULL
+        WS_EX_TOOLWINDOW, WINDOW_CLASS_NAME, L"FastMouseHiddenWindow",
+        WS_POPUP, 0, 0, 0, 0, NULL, NULL, GetModuleHandle(NULL), NULL
     );
     
     if (!ctx->messageWindow) {
@@ -208,14 +230,14 @@ void messageLoopThread(MouseContext* ctx) {
     }
     
     // Register for raw input
-    RAWINPUTDEVICE rid[1];
+    RAWINPUTDEVICE rid[1] = {0};
     rid[0].usUsagePage = 0x01;
     rid[0].usUsage = 0x02;
     rid[0].dwFlags = RIDEV_INPUTSINK;
     rid[0].hwndTarget = ctx->messageWindow;
     
     if (!RegisterRawInputDevices(rid, 1, sizeof(RAWINPUTDEVICE))) {
-        fprintf(stderr, "[FastMouse] Failed to register raw input devices\n");
+        fprintf(stderr, "[FastMouse] Failed to register raw input devices (error: %lu)\n", GetLastError());
         DestroyWindow(ctx->messageWindow);
         UnregisterClassW(WINDOW_CLASS_NAME, GetModuleHandle(NULL));
         ctx->threadAttached = false;
@@ -425,6 +447,62 @@ JNIEXPORT jintArray JNICALL Java_fastmouse_FastMouseImpl_nativeGetCursorPosition
     jint coords[2] = { (jint)pt.x, (jint)pt.y };
     env->SetIntArrayRegion(result, 0, 2, coords);
     return result;
+}
+
+static BOOL CALLBACK FindTerminalChildEnum(HWND hwnd, LPARAM lParam) {
+    char className[256];
+    if (GetClassNameA(hwnd, className, sizeof(className))) {
+        if (strstr(className, "TermControl") != NULL || 
+            strstr(className, "Console") != NULL ||
+            strstr(className, "VirtualConsole") != NULL) {
+            if (IsWindowVisible(hwnd)) {
+                *(HWND*)lParam = hwnd;
+                return FALSE; // Found active visible terminal panel, stop!
+            }
+        }
+    }
+    return TRUE;
+}
+
+JNIEXPORT jlong JNICALL Java_fastmouse_FastMouseImpl_nativeGetConsoleWindow(JNIEnv* env, jclass clazz) {
+    HWND hwnd = GetConsoleWindow();
+    
+    // Check if we are hosted under Windows Terminal or another root container
+    HWND hwndForeground = GetForegroundWindow();
+    if (hwndForeground != NULL) {
+        bool isOurWindow = (hwndForeground == hwnd);
+        if (!isOurWindow) {
+            HWND parent = hwnd;
+            while (parent != NULL) {
+                if (parent == hwndForeground) {
+                    isOurWindow = true;
+                    break;
+                }
+                parent = GetParent(parent);
+            }
+            if (!isOurWindow) {
+                if (GetAncestor(hwnd, GA_ROOT) == hwndForeground || GetAncestor(hwnd, GA_ROOTOWNER) == hwndForeground) {
+                    isOurWindow = true;
+                }
+            }
+        }
+        if (isOurWindow) {
+            HWND hwndTerminalChild = NULL;
+            EnumChildWindows(hwndForeground, FindTerminalChildEnum, (LPARAM)&hwndTerminalChild);
+            if (hwndTerminalChild != NULL) {
+                hwnd = hwndTerminalChild;
+            } else {
+                hwnd = hwndForeground;
+            }
+        }
+    }
+    
+    return (jlong)hwnd;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastmouse_FastMouseImpl_nativeIsKeyPressed(JNIEnv* env, jclass clazz, jint vKey) {
+    SHORT state = GetAsyncKeyState((int)vKey);
+    return ((state & 0x8000) != 0) ? JNI_TRUE : JNI_FALSE;
 }
 
 // ============================================================================

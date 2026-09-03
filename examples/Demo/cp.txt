@@ -1,0 +1,1 @@
+C:\Users\andre\.m2\repository\com\github\andrestubbe\FastCore\0.1.0\FastCore-0.1.0.jar;C:\Users\andre\.m2\repository\com\github\andrestubbe\FastMouse\0.1.1\FastMouse-0.1.1.jar;C:\Users\andre\.m2\repository\com\github\andrestubbe\FastANSI\0.1.0\FastANSI-0.1.0.jar

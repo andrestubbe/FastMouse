@@ -96,6 +96,7 @@ JNIEXPORT jint JNICALL Java_fastmouse_FastMouseImpl_nativeGetDeviceButtonCount(J
  * @return Array of [x, y] screen pixel coordinates
  */
 JNIEXPORT jintArray JNICALL Java_fastmouse_FastMouseImpl_nativeGetCursorPosition(JNIEnv* env, jobject obj);
+JNIEXPORT jlong JNICALL Java_fastmouse_FastMouseImpl_nativeGetConsoleWindow(JNIEnv* env, jclass clazz);
 
 /** @} */
 

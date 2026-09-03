@@ -1,0 +1,64 @@
+================================================================================
+YOUTUBE VIDEO RELEASE
+================================================================================
+
+TITLE:
+FastMouse: Zero-Latency Native Raw Input Mouse Engine for Java (Sub-Millisecond Deltas & Multi-Device)
+
+DESCRIPTION:
+Standard Java AWT/Swing mouse listeners are bound to OS desktop coordinate scaling, UI thread queues, and latency. What happens when you bypass all of that and hook Java directly into the Windows Win32 Raw Input hardware subsystem?
+
+In this showcase, FastMouse delivers microsecond hardware mouse interception, sub-millisecond delta polling (dx, dy), high-precision scroll wheels, and intelligent window-focus gating directly inside Java on Windows 10 & 11.
+
+Whether for high-performance 3D camera controls, gaming viewports, terminal applications, or low-latency creative tooling: FastMouse provides direct access to individual physical mouse hardware handles, zero heap allocations on the hot path, and zero CPU consumption when your target window is unfocused.
+
+TECHNICAL HIGHLIGHTS:
+* Win32 Raw Input Interception: Direct hardware-level mouse packet stream (RIDEV_INPUTSINK) bypassing OS cursor acceleration and message queues.
+* Multi-Mouse Hardware Enumeration: Detects and differentiates between multiple physical mouse devices and HID handles simultaneously.
+* Microsecond Delta Precision: Raw dx/dy deltas suitable for FPS camera rotation, 3D orbiting, and CAD viewports.
+* Intelligent Window-Focus Gating: Deep ancestor and parent hierarchy traversal (wt.exe, conhost, Win32, Vulkan) to eliminate CPU overhead when unfocused.
+* Strict Window Bounds Clamping: Restricts tracking and translates coordinates into exact local client pixels (0..Width, 0..Height).
+* Zero-Allocation Native Dispatch: Lightweight JNI pipeline designed with zero object churn on active motion loops.
+
+GITHUB REPOSITORIES:
+* FastMouse: https://github.com/andrestubbe/FastMouse
+* FastKeyboard: https://github.com/andrestubbe/FastKeyboard
+* FastTerminal: https://github.com/andrestubbe/FastTerminal
+* FastCore: https://github.com/andrestubbe/FastCore
+
+OUR PHILOSOPHY:
+Direct hardware access. Zero-latency raw input. Sub-millisecond timing. Zero framework overhead. Making the JVM faster.
+
+TAGS:
+Java, FastJava, FastMouse, FastKeyboard, RawInput, Win32, JNI, GamingInJava, HighPerformanceJava, ZeroLatency, GameDev, WindowsTerminal, MultiMouse
+
+
+================================================================================
+LINKEDIN POST (ANDRE STUBBE STYLE)
+================================================================================
+
+AWT und Swing MouseListener in Java: Skalierungs-Lags, Desktop-Polling, UI-Thread-Verzoegerungen und keine echten Hardware-Deltas fuer Gaming oder 3D-Viewports.
+
+Deshalb habe ich FastMouse gebaut: Direkter Zugriff auf das Win32 Raw Input Subsystem der Grafik- und Hardware-Schicht unter Windows 10 & 11 – direkt aus Java heraus.
+
+Was die Demo zeigt:
+* Echte physische Hardware-Deltas (dx, dy) in Mikrosekunden, unbeeinflusst von der Windows-Mausbeschleunigung
+* Multi-Device Enumeration: Erkennt und unterscheidet mehrere physische Maeuse getrennt nach HID-Handles
+* Window-Focus Gating: Erkennt verschachtelte Fensterbaeume (inklusive modernem Windows Terminal wt.exe und Vulkan-Fenstern) und schaltet die CPU-Last auf 0%, sobald das Fenster inaktiv ist
+* Client-Relative Pixelkoordinaten (0..Width, 0..Height) mit strikter Begrenzung auf die Fenstergrenzen
+* High-Precision Scroll-Wheel-Events und 5-Tasten-Support
+
+Kein Ruckeln, keine Heap-Allokationen im Hotpath, keine GC-Paussen.
+
+Java muss bei Input nicht hinter C++ oder Rust hinterherhinken. Man muss dem Betriebssystem nur auf Hardware-Ebene zuhoeren.
+
+GitHub Repository:
+https://github.com/andrestubbe/FastMouse
+
+YouTube Showcase:
+https://youtu.be/f_NdYUV0kkU
+
+Full FastJava ecosystem:
+https://github.com/andrestubbe
+
+#FastJava #FastMouse #RawInput #Win32 #JavaPerformance #JNI #GameDev #CreativeCoding #ZeroGC

@@ -131,4 +131,15 @@ class FastMouseImpl implements FastMouse {
     private native String nativeGetDeviceName(long handle);
     private native int nativeGetDeviceButtonCount(long handle);
     private native int[] nativeGetCursorPosition();
+    private static native long nativeGetConsoleWindow();
+
+    static long getConsoleWindowHandle() {
+        return nativeGetConsoleWindow();
+    }
+
+    static boolean isKeyPressed(int vKey) {
+        return nativeIsKeyPressed(vKey);
+    }
+
+    private static native boolean nativeIsKeyPressed(int vKey);
 }

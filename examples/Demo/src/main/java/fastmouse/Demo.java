@@ -9,7 +9,7 @@ import java.util.List;
 public class Demo {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("==============================================");
-        System.out.println("   ⚡ FastMouse Native Demo (FastJava Standard) ⚡");
+        System.out.println("               ⚡ FastMouse Demo ⚡            ");
         System.out.println("==============================================");
 
         try (FastMouse mouse = FastMouse.open()) {
@@ -21,13 +21,8 @@ public class Demo {
                     device.getName(), device.getHandle(), device.getButtonCount());
             }
 
-            // Get console window handle if available
-            long consoleHwnd = 0;
-            try {
-                consoleHwnd = (long) Class.forName("com.sun.jna.platform.win32.Kernel32")
-                        .getMethod("GetConsoleWindow").invoke(null);
-            } catch (Throwable ignored) {
-            }
+            // Resolve current console window handle natively via FastMouse
+            long consoleHwnd = FastMouse.getConsoleWindow();
 
             // Start in window-bound mode if console handle found, else global
             if (consoleHwnd != 0) {
@@ -37,7 +32,8 @@ public class Demo {
                 System.out.println("\n\033[93m>>> [MODE] GLOBAL DESKTOP CAPTURE <<<\033[0m");
             }
 
-            System.out.println("\033[90mListening for high-speed raw mouse events (Move, Click, Wheel)... Press Ctrl+C to exit.\033[0m\n");
+            System.out.println(">>> Commands: Press [B] to toggle Window Binding (Active Window vs. Global)");
+            System.out.println("              Press [ESC] to exit\n");
 
             mouse.startListening(new FastMouseListener() {
                 @Override
@@ -69,7 +65,40 @@ public class Demo {
                 }
             });
 
-            Thread.sleep(Long.MAX_VALUE);
+            // Instant hardware key poller: No Enter key needed, no dirty characters in stdout!
+            Thread inputThread = new Thread(() -> {
+                boolean bWasPressed = false;
+                while (mouse.isListening()) {
+                    boolean bIsPressed = FastMouse.isKeyPressed(0x42); // VK_B
+                    if (bIsPressed && !bWasPressed) {
+                        if (mouse.isWindowBound()) {
+                            mouse.unbindFromWindow();
+                            System.out.println("\n\033[93m>>> [MODE CHANGED] GLOBAL DESKTOP CAPTURE <<<\033[0m\n");
+                        } else if (consoleHwnd != 0) {
+                            mouse.bindToWindow(consoleHwnd);
+                            System.out.println("\n\033[96m>>> [MODE CHANGED] WINDOW-BOUND (Active Terminal: 0x" + Long.toHexString(consoleHwnd).toUpperCase() + ") <<<\033[0m\n");
+                        }
+                    }
+                    bWasPressed = bIsPressed;
+
+                    if (FastMouse.isKeyPressed(0x1B)) { // VK_ESCAPE
+                        System.out.println("\nExiting FastMouse Demo...");
+                        System.exit(0);
+                    }
+
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException ignored) {
+                        break;
+                    }
+                }
+            });
+            inputThread.setDaemon(true);
+            inputThread.start();
+
+            while (mouse.isListening()) {
+                Thread.sleep(500);
+            }
         }
     }
 }

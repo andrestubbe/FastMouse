@@ -12,3 +12,5 @@ EXPORTS
     Java_fastmouse_FastMouseImpl_nativeGetDeviceName
     Java_fastmouse_FastMouseImpl_nativeGetDeviceButtonCount
     Java_fastmouse_FastMouseImpl_nativeGetCursorPosition
+    Java_fastmouse_FastMouseImpl_nativeGetConsoleWindow
+    Java_fastmouse_FastMouseImpl_nativeIsKeyPressed
