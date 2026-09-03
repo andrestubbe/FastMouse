@@ -61,8 +61,8 @@ public class Demo {
 - [Why FastMouse?](#why-fastmouse)
 - [Quick Start](#quick-start)
 - [Key Features](#key-features)
-- [Window Binding & Client Coordinates](#window-binding--client-coordinates)
 - [Real-World Use Cases](#real-world-use-cases)
+- [Window Binding & Client Coordinates](#window-binding--client-coordinates)
 - [Performance Benchmarks](#performance-benchmarks)
 - [API Quick Reference](#api-quick-reference)
 - [Technical Examples & Hero Demos](#technical-examples--hero-demos)
@@ -104,6 +104,15 @@ Standard Java mouse handling (AWT `MouseMotionListener`, Swing, or JavaFX) intro
 
 ---
 
+## Real-World Use Cases
+
+- 🎯 **Esports & 8,000 Hz Gaming Input**: Uncompressed 1:1 hardware sensor deltas without Windows pointer acceleration curves or smoothing ballistics.
+- 🪟 **High-FPS Canvas & Vulkan Viewports ([FastVulkan](https://github.com/andrestubbe/FastVulkan))**: Native client-coordinate conversion (`ScreenToClient`) delivers zero-latency mouse picking, viewport panning, and zooming without JNI overhead.
+- 🖱️ **Multi-Mouse Workstations & CAD**: Simultaneous independent tracking of multiple mice, presenter remotes, or trackballs via unique `hDevice` IDs.
+- 🤖 **Desktop Automation & Screen Telemetry**: High-precision global cursor tracking and telemetry for automated recording and headless testing bots.
+
+---
+
 ## Window Binding & Client Coordinates
 
 FastMouse seamlessly toggles between **Global Desktop Interception** and **Window-Bound UI Capture**:
@@ -120,15 +129,6 @@ mouse.bindToWindow(window.getHWND());
 
 > [!NOTE]
 > Coordinate conversion and focus verification happen in native C++ via `ScreenToClient` and `GetForegroundWindow()`. Out-of-focus mouse movements cause **0 JNI traversals** and **0 JVM allocations**.
-
----
-
-## Real-World Use Cases
-
-- 🎯 **Esports & 8,000 Hz Gaming Input**: Uncompressed 1:1 hardware sensor deltas without Windows pointer acceleration curves or smoothing ballistics.
-- 🪟 **High-FPS Canvas & Vulkan Viewports ([FastVulkan](https://github.com/andrestubbe/FastVulkan))**: Native client-coordinate conversion (`ScreenToClient`) delivers zero-latency mouse picking, viewport panning, and zooming without JNI overhead.
-- 🖱️ **Multi-Mouse Workstations & CAD**: Simultaneous independent tracking of multiple mice, presenter remotes, or trackballs via unique `hDevice` IDs.
-- 🤖 **Desktop Automation & Screen Telemetry**: High-precision global cursor tracking and telemetry for automated recording and headless testing bots.
 
 ---
 
