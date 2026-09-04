@@ -64,9 +64,9 @@ public class Demo {
 - [Quick Start](#quick-start)
 - [Key Features](#key-features)
 - [Real-World Use Cases](#real-world-use-cases)
-- [Window Binding & Client Coordinates](#window-binding--client-coordinates)
 - [Performance Benchmarks](#performance-benchmarks)
 - [API Quick Reference](#api-quick-reference)
+- [Window Binding & Client Coordinates](#window-binding--client-coordinates)
 - [Technical Examples & Hero Demos](#technical-examples--hero-demos)
 - [Installation](#installation)
 - [Documentation](#documentation)
@@ -115,25 +115,6 @@ Standard Java mouse handling (AWT `MouseMotionListener`, Swing, or JavaFX) intro
 
 ---
 
-## Window Binding & Client Coordinates
-
-FastMouse seamlessly toggles between **Global Desktop Interception** and **Window-Bound UI Capture**:
-
-```java
-FastMouse mouse = FastMouse.open();
-
-// 1. Global Mode: Absolute coordinates are in screen pixels (Multi-Monitor aware)
-mouse.unbindFromWindow();
-
-// 2. Window Mode: Coordinates are strictly local client pixels, only active when window has focus
-mouse.bindToWindow(window.getHWND());
-```
-
-> [!NOTE]
-> Coordinate conversion and focus verification happen in native C++ via `ScreenToClient` and `GetForegroundWindow()`. Out-of-focus mouse movements cause **0 JNI traversals** and **0 JVM allocations**.
-
----
-
 ## Performance Benchmarks
 
 FastMouse is rigorously profiled using **JMH** to guarantee zero overhead.
@@ -162,6 +143,25 @@ FastMouse is rigorously profiled using **JMH** to guarantee zero overhead.
 | `boolean isWindowBound()` | Returns `true` if restricted to a specific window. |
 | `int[] getCursorPosition()` | Retrieves `[x, y]` in client or desktop screen pixels. |
 | `long getBoundWindow()` | Returns the bound `HWND` (or `0`). |
+
+---
+
+## Window Binding & Client Coordinates
+
+FastMouse seamlessly toggles between **Global Desktop Interception** and **Window-Bound UI Capture**:
+
+```java
+FastMouse mouse = FastMouse.open();
+
+// 1. Global Mode: Absolute coordinates are in screen pixels (Multi-Monitor aware)
+mouse.unbindFromWindow();
+
+// 2. Window Mode: Coordinates are strictly local client pixels, only active when window has focus
+mouse.bindToWindow(window.getHWND());
+```
+
+> [!NOTE]
+> Coordinate conversion and focus verification happen in native C++ via `ScreenToClient` and `GetForegroundWindow()`. Out-of-focus mouse movements cause **0 JNI traversals** and **0 JVM allocations**.
 
 ---
 

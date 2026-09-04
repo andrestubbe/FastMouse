@@ -2,14 +2,15 @@ package fastmouse;
 
 import fastcore.FastCore;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
- * Implementation of FastMouse using JNI to call native C++ code.
+ * Implementation of {@link FastMouse} using Win32 Raw Input API via JNI.
  */
 class FastMouseImpl implements FastMouse {
 
-    // Load the native library once upon class initialization
     static {
+        // Automatically extracts and loads the native DLL via FastCore
         FastCore.loadLibrary("fastmouse");
     }
 
@@ -17,17 +18,21 @@ class FastMouseImpl implements FastMouse {
     private long targetWindowHandle = 0;
     private FastMouseListener listener;
 
+    /**
+     * Creates a new global FastMouseImpl instance.
+     */
     public FastMouseImpl() {
         this(0);
     }
 
+    /**
+     * Creates a new FastMouseImpl instance bound to a specific Win32 window (HWND).
+     *
+     * @param targetWindowHandle Native HWND of the target window (or 0 for global)
+     */
     public FastMouseImpl(long targetWindowHandle) {
         this.targetWindowHandle = targetWindowHandle;
     }
-
-    // ═══════════════════════════════════════════════════════════
-    // Events & Lifecycle
-    // ═══════════════════════════════════════════════════════════
 
     @Override
     public void startListening(FastMouseListener listener) {
@@ -47,10 +52,6 @@ class FastMouseImpl implements FastMouse {
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // Normal Methods (Binding & Devices)
-    // ═══════════════════════════════════════════════════════════
-
     @Override
     public void bindToWindow(long targetWindowHandle) {
         this.targetWindowHandle = targetWindowHandle;
@@ -62,7 +63,7 @@ class FastMouseImpl implements FastMouse {
     @Override
     public List<MouseDevice> getConnectedDevices() {
         long[] handles = nativeGetConnectedDevices();
-        return java.util.stream.IntStream.range(0, handles.length)
+        return IntStream.range(0, handles.length)
                 .mapToObj(i -> {
                     long handle = handles[i];
                     String name = nativeGetDeviceName(handle);
@@ -71,10 +72,6 @@ class FastMouseImpl implements FastMouse {
                 })
                 .toList();
     }
-
-    // ═══════════════════════════════════════════════════════════
-    // Is / Has
-    // ═══════════════════════════════════════════════════════════
 
     @Override
     public boolean isListening() {
@@ -86,10 +83,6 @@ class FastMouseImpl implements FastMouse {
         return targetWindowHandle != 0;
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // Getter
-    // ═══════════════════════════════════════════════════════════
-
     @Override
     public int[] getCursorPosition() {
         return nativeGetCursorPosition();
@@ -100,22 +93,27 @@ class FastMouseImpl implements FastMouse {
         return targetWindowHandle;
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // Native Callbacks & Methods
-    // ═══════════════════════════════════════════════════════════
-
+    /**
+     * Called by C++ JNI layer on mouse movement events.
+     */
     private void onNativeMouseMove(long deviceHandle, int deltaX, int deltaY, int absoluteX, int absoluteY) {
         if (listener != null) {
             listener.onMouseMove(deviceHandle, deltaX, deltaY, absoluteX, absoluteY);
         }
     }
 
+    /**
+     * Called by C++ JNI layer on mouse button events.
+     */
     private void onNativeMouseButton(long deviceHandle, int buttonId, boolean isPressed) {
         if (listener != null) {
             listener.onMouseButton(deviceHandle, buttonId, isPressed);
         }
     }
 
+    /**
+     * Called by C++ JNI layer on mouse wheel events.
+     */
     private void onNativeMouseWheel(long deviceHandle, int delta) {
         if (listener != null) {
             listener.onMouseWheel(deviceHandle, delta);
@@ -133,10 +131,16 @@ class FastMouseImpl implements FastMouse {
     private native int[] nativeGetCursorPosition();
     private static native long nativeGetConsoleWindow();
 
+    /**
+     * Resolves the current console window HWND handle.
+     */
     static long getConsoleWindowHandle() {
         return nativeGetConsoleWindow();
     }
 
+    /**
+     * Checks if a specific virtual key is currently pressed.
+     */
     static boolean isKeyPressed(int vKey) {
         return nativeIsKeyPressed(vKey);
     }

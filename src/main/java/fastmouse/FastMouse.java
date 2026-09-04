@@ -29,10 +29,6 @@ public interface FastMouse extends AutoCloseable {
         return new FastMouseImpl(targetWindowHandle);
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // Events & Lifecycle
-    // ═══════════════════════════════════════════════════════════
-
     /**
      * Starts listening for raw mouse events.
      * 
@@ -49,10 +45,6 @@ public interface FastMouse extends AutoCloseable {
     default void close() {
         stopListening();
     }
-
-    // ═══════════════════════════════════════════════════════════
-    // Normal Methods (Binding & Devices)
-    // ═══════════════════════════════════════════════════════════
 
     /**
      * Binds mouse capture to a specific Win32 window handle.
@@ -72,16 +64,6 @@ public interface FastMouse extends AutoCloseable {
     }
 
     /**
-     * Returns all currently connected mouse devices.
-     * @return List of MouseDevice objects representing connected mice
-     */
-    List<MouseDevice> getConnectedDevices();
-
-    // ═══════════════════════════════════════════════════════════
-    // Is / Has
-    // ═══════════════════════════════════════════════════════════
-
-    /**
      * Checks if the listener is currently active.
      */
     boolean isListening();
@@ -91,14 +73,23 @@ public interface FastMouse extends AutoCloseable {
      */
     boolean isWindowBound();
 
-    // ═══════════════════════════════════════════════════════════
-    // Getter
-    // ═══════════════════════════════════════════════════════════
+    /**
+     * Checks if a specific virtual key (e.g. 0x42 for 'B', 0x1B for ESC) is currently physically pressed.
+     */
+    static boolean isKeyPressed(int vKey) {
+        return FastMouseImpl.isKeyPressed(vKey);
+    }
+
+    /**
+     * Returns all currently connected mouse devices.
+     * @return List of MouseDevice objects representing connected mice
+     */
+    List<MouseDevice> getConnectedDevices();
 
     /**
      * Retrieves the current cursor position.
      * If window-bound, returns [x, y] in local client pixels; otherwise in screen pixels.
-     * 
+     *
      * @return An array of [x, y] coordinates
      */
     int[] getCursorPosition();
@@ -113,12 +104,5 @@ public interface FastMouse extends AutoCloseable {
      */
     static long getConsoleWindow() {
         return FastMouseImpl.getConsoleWindowHandle();
-    }
-
-    /**
-     * Checks if a specific virtual key (e.g. 0x42 for 'B', 0x1B for ESC) is currently physically pressed.
-     */
-    static boolean isKeyPressed(int vKey) {
-        return FastMouseImpl.isKeyPressed(vKey);
     }
 }
