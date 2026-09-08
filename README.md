@@ -12,7 +12,7 @@
 
 **FastMouse** delivers true unaccelerated sensor deltas, high-polling gaming mouse support (1,000 to 8,000 Hz), multi-mouse hardware identification, and native `ScreenToClient` client-pixel conversion directly from Win32 RawInput (`WM_INPUT`) with zero JVM Garbage Collection overhead.
 
-[**Watch Showcase Demo (YouTube)**](https://youtu.be/f_NdYUV0kkU)
+[**Watch Showcase Demo (YouTube)**](https://youtu.be/f_NdYUV0kkU) | Watch JMH Benchmark (Youtube)
 
 [![FastMouse Showcase](docs/screenshot.png)](https://youtu.be/f_NdYUV0kkU)
 
