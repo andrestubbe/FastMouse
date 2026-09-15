@@ -12,7 +12,7 @@
 
 **FastMouse** delivers true unaccelerated sensor deltas, high-polling gaming mouse support (1,000 to 8,000 Hz), multi-mouse hardware identification, and native `ScreenToClient` client-pixel conversion directly from Win32 RawInput (`WM_INPUT`) with zero JVM Garbage Collection overhead.
 
-[**Watch Showcase Demo (YouTube)**](https://youtu.be/f_NdYUV0kkU) | Watch JMH Benchmark (Youtube)
+[**Watch Showcase Demo (YouTube)**](https://youtu.be/f_NdYUV0kkU) | Watch JMH Benchmark (YouTube)
 
 [![FastMouse Showcase](docs/screenshot.png)](https://youtu.be/f_NdYUV0kkU)
 
@@ -51,6 +51,8 @@ public class Demo {
 
             // Keep main thread alive
             Thread.sleep(Long.MAX_VALUE);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
@@ -60,19 +62,19 @@ public class Demo {
 
 ## Table of Contents
 
-- [Why FastMouse?](#why-fastmouse)
 - [Quick Start](#quick-start)
+- [Why FastMouse?](#why-fastmouse)
 - [Key Features](#key-features)
 - [Real-World Use Cases](#real-world-use-cases)
 - [Performance Benchmarks](#performance-benchmarks)
 - [API Quick Reference](#api-quick-reference)
 - [Window Binding & Client Coordinates](#window-binding--client-coordinates)
-- [Technical Examples & Hero Demos](#technical-examples--hero-demos)
+- [Technical Demos & Benchmarks](#technical-demos--benchmarks)
 - [Installation](#installation)
 - [Documentation](#documentation)
 - [Platform Support](#platform-support)
-- [License](#license)
 - [Related Projects](#related-projects)
+- [License](#license)
 
 ---
 
@@ -81,7 +83,7 @@ public class Demo {
 Standard Java mouse handling (AWT `MouseMotionListener`, Swing, or JavaFX) introduces critical bottlenecks for real-time and high-performance applications:
 
 - **OS Pointer Ballistics**: Standard APIs report accelerated, curved pointer coordinates instead of raw physical sensor counts.
-- **Polling Rate Clamping**: Windows message queues throttle standard mouse events, dropping packets on 1000 Hz – 8000 Hz gaming mice.
+- **Polling Rate Clamping**: Windows message queues throttle standard mouse events, dropping packets on 1,000 Hz – 8,000 Hz gaming mice.
 - **Event Thread Contention**: AWT mouse events run on the Event Dispatch Thread (EDT), causing input lag during rendering spikes.
 - **Global / Local Mismatch**: Global hooks require manual `ScreenToClient` calculations in Java, introducing rounding errors and multi-monitor DPI offsets.
 
@@ -130,19 +132,17 @@ FastMouse is rigorously profiled using **JMH** to guarantee zero overhead.
 
 ## API Quick Reference
 
-| Method | Description |
-|---|---|
-| `static FastMouse open()` | Factory method to create a global desktop capture instance. |
-| `static FastMouse openForWindow(long hwnd)` | Factory method bound to a Win32 window with auto client coordinates. |
-| `void startListening(FastMouseListener listener)` | Begins background raw input mouse processing. |
-| `void stopListening()` | Stops the message pump thread and frees native handles. |
-| `void bindToWindow(long hwnd)` | Focus-gates capture and enables client-relative coordinates. |
-| `void unbindFromWindow()` | Restores global desktop coordinate mapping. |
-| `List<MouseDevice> getConnectedDevices()` | Lists all connected HID mouse hardware devices. |
-| `boolean isListening()` | Returns `true` if listening is currently active. |
-| `boolean isWindowBound()` | Returns `true` if restricted to a specific window. |
-| `int[] getCursorPosition()` | Retrieves `[x, y]` in client or desktop screen pixels. |
-| `long getBoundWindow()` | Returns the bound `HWND` (or `0`). |
+| Method | Return Type | Description | Docs |
+|---|---|---|---|
+| `FastMouse.open()` | `FastMouse` | Creates a global desktop RawInput capture instance. | [Reference](docs/REFERENCE.md#interface-fastmousefastmouse) |
+| `FastMouse.openForWindow(hwnd)` | `FastMouse` | Creates window-bound capture with auto client mapping. | [Reference](docs/REFERENCE.md#interface-fastmousefastmouse) |
+| `startListening(listener)` | `void` | Begins background raw input mouse message processing. | [Reference](docs/REFERENCE.md#interface-fastmousefastmouse) |
+| `stopListening()` | `void` | Stops the message pump thread and halts dispatching. | [Reference](docs/REFERENCE.md#interface-fastmousefastmouse) |
+| `bindToWindow(hwnd)` | `void` | Focus-gates capture and enables client coordinates. | [Reference](docs/REFERENCE.md#interface-fastmousefastmouse) |
+| `unbindFromWindow()` | `void` | Restores global desktop coordinate mapping. | [Reference](docs/REFERENCE.md#interface-fastmousefastmouse) |
+| `getConnectedDevices()` | `List<MouseDevice>` | Enumerates all connected HID mouse hardware devices. | [Reference](docs/REFERENCE.md#interface-fastmousefastmouse) |
+| `getCursorPosition()` | `int[]` | Retrieves `[x, y]` in client or desktop screen pixels. | [Reference](docs/REFERENCE.md#interface-fastmousefastmouse) |
+| `close()` | `void` | Releases native hooks and frees unmanaged resources. | [Reference](docs/REFERENCE.md#interface-fastmousefastmouse) |
 
 ---
 
@@ -165,12 +165,12 @@ mouse.bindToWindow(window.getHWND());
 
 ---
 
-## Technical Examples & Hero Demos
+## Technical Demos & Benchmarks
 
 | Case | Java Example | Launcher | Description |
 |---|---|---|---|
 | **Interactive Terminal Demo** | [Demo.java](examples/Demo/src/main/java/fastmouse/Demo.java) | `run-demo.bat` | High-speed mouse delta, button, and wheel monitor styled with FastANSI gray & bright-white theme. |
-| **Throughput Benchmark** | [Benchmark.java](examples/Benchmark/src/main/java/fastmouse/benchmark/Benchmark.java) | `run-benchmark.bat` | Performance benchmark measuring dispatch rates and query latency under heavy polling loads. |
+| **JMH Microbenchmark Suite** | [Benchmark.java](examples/Benchmark/src/main/java/fastmouse/benchmark/Benchmark.java) | `run-benchmark.bat` | Performance benchmark measuring dispatch rates and query latency under heavy polling loads. |
 
 ---
 
@@ -189,6 +189,7 @@ Add the JitPack repository and the dependency to your `pom.xml`:
 </repositories>
 
 <dependencies>
+    <!-- FastMouse Library -->
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastMouse</artifactId>
@@ -230,11 +231,11 @@ Download the latest JARs directly to add them to your classpath:
 
 ## Documentation
 
-* **[COMPILE.md](docs/COMPILE.md)**: Full compilation guide (MSVC C++17 build chain + JNI Setup).
-* **[REFERENCE.md](docs/REFERENCE.md)**: Full API descriptions and method reference.
-* **[PHILOSOPHY.md](docs/PHILOSOPHY.md)**: The engineering rationale for zero-allocation performance.
-* **[ROADMAP.md](docs/ROADMAP.md)**: Future milestones and planned features.
-* **[CHANGELOG.md](docs/CHANGELOG.md)**: Complete version history and release notes.
+- **[COMPILE.md](docs/COMPILE.md)**: Full compilation guide (MSVC C++17 build chain + JNI Setup).
+- **[REFERENCE.md](docs/REFERENCE.md)**: Full API descriptions and method reference.
+- **[PHILOSOPHY.md](docs/PHILOSOPHY.md)**: The engineering rationale for zero-allocation performance.
+- **[ROADMAP.md](docs/ROADMAP.md)**: Future milestones and planned features.
+- **[CHANGELOG.md](docs/CHANGELOG.md)**: Complete version history and release notes.
 
 ---
 
@@ -247,27 +248,20 @@ Download the latest JARs directly to add them to your classpath:
 
 ---
 
+## Related Projects
+
+- **[`FastCore`](https://github.com/andrestubbe/FastCore)** — Native Library Loader & JNI Utilities for Java
+- **[`FastHotkey`](https://github.com/andrestubbe/FastHotkey)** — Low-Latency Global Hotkey API for Java
+- **[`FastKeyboard`](https://github.com/andrestubbe/FastKeyboard)** — Ultra-Fast Native RawInput Keyboard Engine
+- **[`FastTouch`](https://github.com/andrestubbe/FastTouch)** — Native Multi-Touch Digitizer API for Java
+- **[`FastVulkan`](https://github.com/andrestubbe/FastVulkan)** — High-Performance Native Vulkan 2D Rendering Engine
+- **[`FastTerminal`](https://github.com/andrestubbe/FastTerminal)** — Native High-Speed Terminal & TUI Engine
+
+---
+
 ## License
 
 MIT License — See [LICENSE](LICENSE) file for details.
 
 ---
-
-## Related Projects
-
-- [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader & JNI Utilities for Java
-- [FastHotkey](https://github.com/andrestubbe/FastHotkey) — Low-Latency Global Hotkey API for Java
-- [FastKeyboard](https://github.com/andrestubbe/FastKeyboard) — Ultra-Fast Native RawInput Keyboard Engine
-- [FastKeylogger](https://github.com/andrestubbe/FastKeylogger) — Behavioral Typing & Telemetry Logic for Java
-- [FastMouse](https://github.com/andrestubbe/FastMouse) — Ultra-Low Latency Native RawInput Mouse Engine
-- [FastMouseLogger](https://github.com/andrestubbe/FastMouseLogger) — Mouse Telemetry & Behavioral Analytics
-- [FastTouch](https://github.com/andrestubbe/FastTouch) — Native Multi-Touch Digitizer API for Java
-- [FastStylus](https://github.com/andrestubbe/FastStylus) — Native Pen & Stylus Pressure API for Java
-- [FastVulkan](https://github.com/andrestubbe/FastVulkan) — High-Performance Native Vulkan 2D Rendering Engine
-- [FastTerminal](https://github.com/andrestubbe/FastTerminal) — Native High-Speed Terminal & TUI Engine
-- [FastAnimation](https://github.com/andrestubbe/FastAnimation) — Ultra-Fast Native Animation & Timeline Engine
-- [FastSIMD](https://github.com/andrestubbe/FastSIMD) — AVX2/AVX-512 Vectorized Operations for Java
-
----
-
-**Part of the FastJava Ecosystem** — *Making the JVM faster. Small package. Maximum speed. Zero bloat. 🚀📋*
+**Part of the FastJava Ecosystem** — *Making the JVM faster.* 🚀
