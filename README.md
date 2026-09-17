@@ -94,6 +94,13 @@ Standard Java mouse handling (AWT `MouseMotionListener`, Swing, or JavaFX) intro
 - **Native Client-Coordinate Conversion**: When bound to an `HWND`, Win32 `ScreenToClient` converts coordinates natively before dispatching to Java.
 - **Focus Gating**: Ignores clicks and movements when the target window is in the background — **zero CPU overhead** when inactive.
 
+| Feature | Java AWT / Swing MouseEvents | JNativeHook (Global Mouse) | FastMouse |
+|:---|:---|:---|:---|
+| **Sensor Data** | OS accelerated screen coordinates| Accelerated desktop cursor | **Raw unaccelerated sensor deltas (`lLastX/Y`)**|
+| **Max Polling Rate** | ~125–250 Hz (throttled queue) | ~500 Hz (wrapper jitter) | **1,000 Hz – 8,000 Hz gaming grade** |
+| **Multi-Device Tracking**| Single aggregated pointer | Aggregated cursor only | **Multi-mouse `hDevice` disambiguation** |
+| **Client Coordinate Mapping**| Java calculation / DPI bugs | Manual math required | **Native Win32 `ScreenToClient` in C++** |
+
 ---
 
 ## Key Features
